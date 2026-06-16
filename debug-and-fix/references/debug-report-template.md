@@ -69,12 +69,10 @@ Example:
 
 Exact commands from this repo. Do not guess. Include only commands the executor is likely to need.
 
-| Purpose   | Command     | Expected on success |
-| --------- | ----------- | ------------------- |
-| Install   | `<command>` | `<expected result>` |
-| Typecheck | `<command>` | `<expected result>` |
-| Test      | `<command>` | `<expected result>` |
-| Lint      | `<command>` | `<expected result>` |
+| Purpose | Command | Expected on success |
+| ------- | ------- | ------------------- |
+
+<!-- Add one row per exact command discovered during investigation. Do not include install/typecheck/test/lint rows unless those commands were verified in this repo. If no verification command exists, write: No repo verification command found during investigation. -->
 
 <!--
 Optional: Suggested executor toolkit.

@@ -290,6 +290,10 @@ Each command must include:
 - exact command
 - expected result
 
+Never invent standard install, typecheck, test, lint, or build commands.
+Include a command only after discovering it in repo config, docs, CI, scripts, or reliable user-provided instructions.
+When no command is known, say `No repo verification command found during investigation.` instead of filling placeholder rows.
+
 Do not list every command attempted during investigation unless it provides useful context.
 
 ### Done criteria
