@@ -180,7 +180,7 @@ The report must include:
 - `Status`: `TODO | IN PROGRESS | DONE`
 - `Risk`: `LOW | MED | HIGH`
 - `Confidence`: `LOW | MED | HIGH`
-- `Planned at`: only when git metadata is available
+- `Planned at`: optional metadata; include only when git metadata is available
 - `Summary`
 - `Reproduction`
 - `Evidence`
@@ -195,11 +195,12 @@ The report must include:
 
 Optional sections:
 
-- `Suggested executor toolkit`: include only when relevant tools/skills plausibly exist in the executor's environment. Skip otherwise.
-- `Debug probes used`: include when probes/logs materially confirmed or rejected a hypothesis.
-- `Maintenance notes`: include only when the bug reveals future maintenance risk, fragile ownership boundaries, duplicated logic, reviewer concerns, or deferred follow-up.
+- `Suggested executor toolkit`: omit by default; include only when relevant tools/skills plausibly exist in the executor's environment.
+- `Debug probes used`: omit by default; include only when probes/logs materially confirmed or rejected a hypothesis.
+- `Maintenance notes`: omit by default; include only when the bug reveals future maintenance risk, fragile ownership boundaries, duplicated logic, reviewer concerns, or deferred follow-up.
 
 Do not include an `Open Questions` section.
+Do not include unused placeholders or placeholder-only optional sections.
 
 If there are unresolved questions:
 

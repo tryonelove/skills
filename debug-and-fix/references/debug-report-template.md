@@ -3,10 +3,10 @@
 - **Status**: TODO | IN PROGRESS | DONE
 - **Risk**: LOW | MED | HIGH
 - **Confidence**: LOW | MED | HIGH
-- **Planned at**: commit `<short SHA>`, <YYYY-MM-DD>
 
 <!--
-Include "Planned at" only when git metadata is available.
+Optional: Planned at.
+Add "- **Planned at**: commit `<short SHA>`, <YYYY-MM-DD>" only when git metadata is available.
 Skip it entirely when git metadata is unavailable.
 -->
 
@@ -42,12 +42,10 @@ Use file paths whenever relevant. Add line ranges only when useful/stable. Inclu
   - ...
 
 <!--
-Include "Ruled out" only when it prevents future backtracking or explains why an obvious alternative is not the cause.
+Optional: Ruled out.
+Add "- **Ruled out**:" only when it prevents future backtracking or explains why an obvious alternative is not the cause.
 Omit it otherwise.
 -->
-
-- **Ruled out**:
-  - `<hypothesis>` — `<evidence that ruled it out>`
 
 ## Current state
 
@@ -78,11 +76,10 @@ Exact commands from this repo. Do not guess. Include only commands the executor 
 | Test      | `<command>` | `<expected result>` |
 | Lint      | `<command>` | `<expected result>` |
 
-## Suggested executor toolkit
-
-Optional. Include only when relevant skills/tools plausibly exist in the executor's environment. Skip this section otherwise.
-
-- `<skill/tool>` — why it is useful for this report.
+<!--
+Optional: Suggested executor toolkit.
+Add this section only when relevant skills/tools plausibly exist in the executor's environment. Skip otherwise.
+-->
 
 ## Scope
 
@@ -127,18 +124,9 @@ Each step should be small enough to verify independently.
 Order steps so the codebase is not left broken between steps when possible.
 -->
 
-## Debug probes used
-
-Optional. Include when probes/logs materially confirmed or rejected a hypothesis. Skip otherwise.
-
-- **Probe ID**: `[DBG session=<id> probe=<id> point=<name>]`
-  - **Purpose**:
-  - **Location**:
-  - **Observed values**:
-  - **Conclusion**:
-  - **Status**: Removed from code.
-
 <!--
+Optional: Debug probes used.
+Add this section when probes/logs materially confirmed or rejected a hypothesis. Skip otherwise.
 Include exact probe code only when the next executor must recreate the probe.
 Do not paste large logs.
 -->
@@ -167,13 +155,7 @@ Stop and report back. Do not improvise if:
 - You discover a key assumption from the diagnosis is false.
 - The fix appears to require a public behavior/API change that is out of scope.
 
-## Maintenance notes
-
-Optional. Include only when useful.
-
-For the human/agent who owns this code after the change lands:
-
-- future changes that interact with this fix
-- reviewer concerns
-- known fragile areas
-- deferred follow-up and why
+<!--
+Optional: Maintenance notes.
+Add this section only when useful for future changes, reviewer concerns, fragile areas, or deferred follow-up.
+-->
