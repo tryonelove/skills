@@ -97,7 +97,8 @@ Probe limits:
 - max 3 probes per round
 - max 2 runtime rounds before reassessing
 - place probes at decision points, not throughout the function
-- log only values that distinguish between hypotheses
+- never log or ask the user to paste raw secrets, API keys, tokens, auth headers, passwords, cookies, session identifiers, full request bodies, environment variables, or PII
+- log only sanitized discriminators that distinguish hypotheses: booleans, counts, enum names, lengths, or redacted summaries
 - use structured IDs so the user can filter and paste only relevant lines
 
 Example:
@@ -105,7 +106,7 @@ Example:
 ```ts
 console.log(
   "[DBG session=2026-06-15 probe=H2 point=auth-branch]",
-  JSON.stringify({ userId, hasToken, route }),
+  JSON.stringify({ hasUserId: Boolean(userId), hasToken, routeName }),
 );
 ```
 
@@ -117,6 +118,8 @@ Run:
 
 Paste only lines matching:
 `[DBG session=<id>`
+
+Paste only sanitized `[DBG ...]` lines. Do not paste secrets, tokens, cookies, auth headers, passwords, or PII.
 
 Expected probes:
 

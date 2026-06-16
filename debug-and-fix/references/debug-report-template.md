@@ -126,6 +126,7 @@ Order steps so the codebase is not left broken between steps when possible.
 Optional: Debug probes used.
 Add this section when probes/logs materially confirmed or rejected a hypothesis. Skip otherwise.
 Include exact probe code only when the next executor must recreate the probe.
+Observed values means sanitized summaries only; never secret values.
 Do not paste large logs.
 -->
 
