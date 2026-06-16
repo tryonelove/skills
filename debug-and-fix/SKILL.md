@@ -9,7 +9,7 @@ Systematically diagnose a reported issue, identify the root cause, and either pr
 
 ## Modes
 
-Use report mode when the user asks why something is failing, asks for diagnosis, asks for investigation, asks for a report, or does not explicitly request code changes.
+Use `report` mode when the user asks why something is failing, asks for diagnosis, asks for investigation, asks for a report, or does not explicitly request code changes. The `report` mode dispatches a _separate executor agent_ that does the finding in an isolated git worktree - you review its findings and render a verdict.
 
 Use fix mode only when the user explicitly asks to fix, patch, repair, implement the fix, or make code changes.
 
@@ -53,7 +53,7 @@ Classify reproduction status using only:
 - `PARTIAL`: related behavior was reproduced, but not the full original scenario.
 - `NOT REPRODUCED`: the diagnosis is based on code reading, logs, tests, or user-provided evidence without reproducing the original failure.
 
-### 2. Explore the relevant code
+### 2. Explore the relevant code (Parallel)
 
 Locate and read the relevant code paths end-to-end:
 
