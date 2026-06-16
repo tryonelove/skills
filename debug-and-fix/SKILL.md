@@ -9,7 +9,11 @@ Systematically diagnose a reported issue, identify the root cause, and either pr
 
 ## Modes
 
-Default mode is `fix`.
+Use report mode when the user asks why something is failing, asks for diagnosis, asks for investigation, asks for a report, or does not explicitly request code changes.
+
+Use fix mode only when the user explicitly asks to fix, patch, repair, implement the fix, or make code changes.
+
+If the request is ambiguous between diagnosis-only and editing, ask one concise clarification before changing code.
 
 - `report`, `diagnose`, `diagnose-only`, `investigate`, or `why`: find the root cause and produce a debug report. Do not implement the fix. Do not leave debug probes/logs in the code.
 - `fix`: find the root cause, remove all debug probes/logs, implement the minimal fix, and verify it.
@@ -142,6 +146,12 @@ If no hypothesis is confirmed after two probe rounds, stop adding logs and reass
 - whether the user needs to provide one missing fact
 
 ### 6. Produce report or apply fix
+
+Choose the output path from explicit user intent before editing:
+
+- use report mode when the user asks why, asks for diagnosis/investigation/report, or does not explicitly request code changes
+- use fix mode only when the user explicitly asks to fix, patch, repair, implement the fix, or make code changes
+- if intent is ambiguous between diagnosis-only and editing, ask one concise clarification before changing code
 
 In `report` mode:
 
