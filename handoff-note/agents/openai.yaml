@@ -1,0 +1,4 @@
+interface:
+  display_name: "Handoff Note"
+  short_description: "Condense progress into continuation notes"
+  default_prompt: "Use $handoff-note to summarize the current work into a tight continuation note."
