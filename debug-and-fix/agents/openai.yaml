@@ -1,0 +1,4 @@
+interface:
+  display_name: "Debug and Fix"
+  short_description: "Diagnose and fix frontend React bugs"
+  default_prompt: "Use $debug-and-fix to investigate this frontend React issue and either report the root cause or apply a minimal fix."

@@ -1,330 +1,107 @@
 ---
 name: debug-and-fix
-description: Systematically diagnose and optionally fix reported issues. Use when the user reports a bug, unexpected behavior, asks why something is failing, wants a diagnosis/report, or wants targeted debugging with runtime logs.
+description: Diagnose and optionally fix frontend JavaScript, TypeScript, and React bugs. Use when the user reports broken UI behavior, browser/runtime errors, React rendering or hook issues, hydration problems, failing frontend tests/builds, CSS interaction bugs, asks for a debug report, wants 2-4 hypotheses with file references, needs temporary console probes, or explicitly asks for a minimal verified frontend bug fix.
 ---
 
 # Debug and Fix
 
-Systematically diagnose a reported issue, identify the root cause, and either produce an execution-ready debug report or apply the minimal verified fix.
+Diagnose frontend issues by reading the code first, then using the smallest runtime evidence needed. Work in one of two modes: `report` for diagnosis and collaboration, or `fix` for minimal verified code changes.
 
-## Modes
+## Mode Selection
 
-Use `report` mode when the user asks why something is failing, asks for diagnosis, asks for investigation, asks for a report, or does not explicitly request code changes. The `report` mode dispatches a _separate executor agent_ that does the finding in an isolated git worktree - you review its findings and render a verdict.
+- Use `report` mode when the user asks why something is failing, asks to investigate/debug/diagnose/report, or describes a bug without explicitly asking for code changes.
+- Use `fix` mode only when the user explicitly asks to fix, patch, repair, implement, or make code changes.
+- If intent is ambiguous between diagnosis-only and editing, ask one concise clarification before changing non-debug code.
+- In `report` mode, do not implement the fix. Temporary debug probes are allowed only to identify the issue and must be removed before claiming completion.
+- In `fix` mode, remove all temporary probes/logs, implement the smallest confirmed fix, and run relevant verification.
 
-Use fix mode only when the user explicitly asks to fix, patch, repair, implement the fix, or make code changes.
+## Core Workflow
 
-If the request is ambiguous between diagnosis-only and editing, ask one concise clarification before changing code.
+1. Capture the failure shape: exact UI path/action, expected behavior, actual behavior, error text, browser/environment, input/state, and whether it reproduces.
+2. Inspect code before asking the user to run anything when the code can answer the question. Trace the route/component, props, state, hooks, effects, data loaders, query/cache keys, event handlers, forms, async boundaries, styling branches, and nearby tests/stories.
+3. Answer from code when possible. If code proves the root cause, report it or fix it without adding probes.
+4. If the cause is not trivial, provide 2-4 working hypotheses with brief arguments and file references before adding runtime probes.
+5. Confirm or reject hypotheses with the cheapest evidence: existing tests, type/lint/build output, local repro, browser checks, then targeted sanitized console probes.
+6. Stop when the root cause is confirmed enough to recommend a concrete fix.
 
-- `report`, `diagnose`, `diagnose-only`, `investigate`, or `why`: find the root cause and produce a debug report. Do not implement the fix. Do not leave debug probes/logs in the code.
-- `fix`: find the root cause, remove all debug probes/logs, implement the minimal fix, and verify it.
+## Hypotheses
 
-The report mode output must use `references/debug-report-template.md`.
+When the issue is not immediately obvious, write:
 
-## Core principles
-
-- Prefer evidence over guessing.
-- Prefer code reading over runtime probes when code reading can prove or disprove a hypothesis.
-- Prefer a minimal failing case over broad exploration.
-- Prefer the smallest fix that directly addresses the confirmed root cause.
-- Do not refactor surrounding code unless the refactor is required to fix the bug.
-- Do not produce a final report with unresolved open questions. Resolve them first by exploring the codebase. If the codebase cannot answer them, ask the user during the debugging session.
-- If uncertainty still remains after reasonable investigation, reflect it through `Confidence` and `Risk`, not through an open-ended TODO section.
-
-## Workflow
-
-### 1. Reproduce or pin down the failure
-
-Capture the exact failure shape:
-
-- command, UI path, or action
-- input/state
-- error text
-- expected behavior
-- actual behavior
-- environment details when relevant
-
-If you can run the issue, reproduce before reading deeply.
-
-If you cannot run it, ask for the smallest missing repro detail or command output.
-
-Classify reproduction status using only:
-
-- `REPRODUCED`: the failure was reproduced directly.
-- `PARTIAL`: related behavior was reproduced, but not the full original scenario.
-- `NOT REPRODUCED`: the diagnosis is based on code reading, logs, tests, or user-provided evidence without reproducing the original failure.
-
-### 2. Explore the relevant code (Parallel)
-
-Locate and read the relevant code paths end-to-end:
-
-- entry points
-- handlers/controllers/routes
-- data flow
-- state updates
-- external boundaries
-- tests around the failing behavior
-- similar working patterns elsewhere in the repo
-
-If the bug appears to be a regression, check recent changes around the relevant files:
-
-```sh
-git log -p -- <file>
+```md
+Working hypotheses:
+1. H1: <possible cause> -- likely because <evidence>. Refs: `<file>`, `<symbol>`.
+   Confirm/rule out: <specific check>.
+2. H2: ...
 ```
 
-Only move to hypothesis formation after you understand the relevant path.
+- Rank hypotheses by cheapest confirmation path.
+- Include 2-4 hypotheses, not a broad brainstorm.
+- Use file and symbol references; line references are useful when stable.
+- Mark a hypothesis confirmed only after code, runtime, or test evidence supports it.
 
-### 3. Form 2–4 hypotheses
+## Debug Probes
 
-Rank hypotheses by cheapest evidence first.
+Use probes only when code reading cannot distinguish the hypotheses.
 
-For each hypothesis, identify:
-
-- what might be happening
-- what evidence would confirm it
-- what evidence would rule it out
-- whether it can be confirmed by code reading alone
-
-Resolve hypotheses through code reading when possible.
-
-Only add runtime probes for hypotheses that require runtime observation.
-
-### 4. Add targeted debug probes when needed
-
-Use runtime probes only when code reading is insufficient.
-
-Probe limits:
-
-- max 3 probes per round
-- max 2 runtime rounds before reassessing
-- place probes at decision points, not throughout the function
-- never log or ask the user to paste raw secrets, API keys, tokens, auth headers, passwords, cookies, session identifiers, full request bodies, environment variables, or PII
-- log only sanitized discriminators that distinguish hypotheses: booleans, counts, enum names, lengths, or redacted summaries
-- use structured IDs so the user can filter and paste only relevant lines
-
-Example:
+- Add at most 3 probes per round and at most 2 probe rounds before reassessing.
+- Place probes at decision points: handler entry, branch selection, async response shape, render condition, state transition, or effect trigger.
+- Log only sanitized discriminators: booleans, enum names, counts, lengths, route names, and redacted identifiers.
+- Never log or ask the user to paste secrets, tokens, cookies, auth headers, passwords, full request bodies, environment variables, or PII.
+- Use searchable IDs:
 
 ```ts
-console.log(
-  "[DBG session=2026-06-15 probe=H2 point=auth-branch]",
-  JSON.stringify({ hasUserId: Boolean(userId), hasToken, routeName }),
-);
+console.log("[DBG frontend issue=<slug> probe=H2 point=<point>]", {
+  hasUserId: Boolean(userId),
+  itemCount: items.length,
+  activeTab,
+});
 ```
 
-When asking the user to run code, give a strict log contract:
+When asking the user to run with probes, give a strict paste contract:
 
 ```md
-Run:
-`<command>`
-
-Paste only lines matching:
-`[DBG session=<id>`
-
-Paste only sanitized `[DBG ...]` lines. Do not paste secrets, tokens, cookies, auth headers, passwords, or PII.
-
-Expected probes:
-
-- H1: confirms/rules out <condition>
-- H2: confirms/rules out <condition>
+Run `<command or UI action>`.
+Paste only lines containing `[DBG frontend issue=<slug>`.
+Do not paste tokens, cookies, auth headers, passwords, full request bodies, environment variables, or PII.
 ```
 
-All `[DBG ...]` probes and temporary logs must be removed before reporting completion or implementing the fix.
+If probes remain while waiting for user output, state the exact files changed and that the work is not complete. Remove probes before the final report or fix whenever the session can continue.
 
-### 5. Identify the root cause
+## Report Mode
 
-Once code reading, tests, logs, or probes confirm the diagnosis:
+Goal: identify the issue quickly with the user, using code first and targeted probes only when needed.
 
-- state the confirmed hypothesis
-- explain why it is the root cause
-- distinguish symptom, trigger, root cause, and impact
-- include rejected hypotheses only when they prevent future backtracking or explain why an obvious alternative is not the cause
+1. State reproduction status: `REPRODUCED`, `PARTIAL`, or `NOT REPRODUCED`.
+2. If code answers the question, give a concise diagnosis with file references and a recommended fix.
+3. If not, give 2-4 hypotheses and either run a local check or add targeted probes with clear run/paste instructions.
+4. Once the root cause is confirmed, produce a report using `references/debug-report-template.md`.
+5. Remove placeholder-only sections. Include only evidence that mattered.
 
-Do not proceed with a vague diagnosis.
+## Fix Mode
 
-If no hypothesis is confirmed after two probe rounds, stop adding logs and reassess:
+1. Confirm or derive the root cause before changing behavior.
+2. Make the smallest scoped edit that directly fixes the confirmed cause.
+3. Do not refactor adjacent code or add fallback logic, backward compatibility layers, adapters, feature flags, or legacy support unless explicitly requested.
+4. Follow existing frontend patterns for state management, routing, query/cache usage, forms, styling, testing, and file organization.
+5. Add or update the smallest regression test when the repo has a clear pattern and the bug is testable.
+6. Run relevant verification discovered from repo scripts, docs, or CI. Do not invent commands.
+7. Remove all temporary debug probes/logs.
+8. Final response: root cause, changed files, verification, and residual risk if any.
 
-- repro accuracy
-- assumptions
-- code path
-- environment
-- whether the user needs to provide one missing fact
+## Frontend Checks
 
-### 6. Produce report or apply fix
+Prefer investigating these areas when relevant:
 
-Choose the output path from explicit user intent before editing:
+- UI events: handler binding, default prevention, disabled states, overlays, pointer events, stale closures.
+- State and render: controlled inputs, derived state, memoization, keys, conditional guards, React StrictMode double invocation.
+- Async and data: loading/error states, cache key mismatches, races, cancellation, stale query data, response shape, optimistic updates.
+- Routing and hydration: route/search params, server/client boundaries, browser-only APIs during SSR, hydration mismatches.
+- Styling and layout: overflow clipping, z-index, media/container queries, focus states, keyboard interaction.
+- Verification: existing unit, component, E2E, Storybook, typecheck, lint, or build commands found in the repo.
 
-- use report mode when the user asks why, asks for diagnosis/investigation/report, or does not explicitly request code changes
-- use fix mode only when the user explicitly asks to fix, patch, repair, implement the fix, or make code changes
-- if intent is ambiguous between diagnosis-only and editing, ask one concise clarification before changing code
+## Output Rules
 
-In `report` mode:
-
-- produce a debug report using `references/debug-report-template.md`
-- do not implement the fix
-- do not leave debug probes/logs in the code
-- make the report self-contained enough for another executor to apply the fix without seeing the conversation
-
-In `fix` mode:
-
-- apply the minimal scoped fix
-- add or update the smallest regression test when the repo has a clear test pattern
-- run the relevant verification command
-- remove all `[DBG ...]` probes and temporary debug logs
-- report what changed, how it was verified, and any risk
-
-## Debug report requirements
-
-When producing a report, use the template in `references/debug-report-template.md`.
-
-The report is a reusable issue artifact and pre-fix checkpoint. It should be dense with necessary information but not noisy.
-
-The report must include:
-
-- bug-specific title
-- `Status`: `TODO | IN PROGRESS | DONE`
-- `Risk`: `LOW | MED | HIGH`
-- `Confidence`: `LOW | MED | HIGH`
-- `Planned at`: optional metadata; include only when git metadata is available
-- `Summary`
-- `Reproduction`
-- `Evidence`
-- `Diagnosis`
-- `Current state`
-- `Commands you will need`
-- `Scope`
-- `Recommended fix`
-- `Steps`
-- `Done criteria`
-- `STOP conditions`
-
-Optional sections:
-
-- `Suggested executor toolkit`: omit by default; include only when relevant tools/skills plausibly exist in the executor's environment.
-- `Debug probes used`: omit by default; include only when probes/logs materially confirmed or rejected a hypothesis.
-- `Maintenance notes`: omit by default; include only when the bug reveals future maintenance risk, fragile ownership boundaries, duplicated logic, reviewer concerns, or deferred follow-up.
-
-Do not include an `Open Questions` section.
-Do not include unused placeholders or placeholder-only optional sections.
-
-If there are unresolved questions:
-
-1. First try to answer them by exploring the codebase.
-2. If the codebase cannot answer them, ask the user during the session.
-3. Only produce the report after the uncertainty is resolved enough to recommend a fix.
-
-## Report field rules
-
-### Status
-
-Allowed values:
-
-- `TODO`: diagnosis/report is complete; fix has not started.
-- `IN PROGRESS`: executor has started applying the fix.
-- `DONE`: fix has been applied and verified.
-
-### Risk
-
-Allowed values:
-
-- `LOW`: narrow/local fix, clear root cause, low blast radius, straightforward verification.
-- `MED`: touches shared logic, unclear edge cases, migration risk, or partial verification.
-- `HIGH`: broad architectural change, public API/data model change, security/auth/payment path, weak confidence, or high blast radius.
-
-### Confidence
-
-Allowed values:
-
-- `HIGH`: reproduced, confirmed by code/logs/tests, or directly proven from the code path.
-- `MED`: strongly supported, but one important verification step was not available.
-- `LOW`: plausible but missing key evidence. Avoid final reports at this level unless the user explicitly asks for the best available diagnosis.
-
-### Planned at
-
-Include only when git metadata is available.
-
-Format:
-
-```md
-- **Planned at**: commit `<short SHA>`, <YYYY-MM-DD>
-```
-
-Skip the field entirely when git metadata is unavailable.
-
-### Evidence
-
-Evidence must be concrete.
-
-Good evidence:
-
-- file paths
-- useful line ranges
-- function/component names
-- commands and results
-- distilled user-provided errors/logs/repro notes
-- runtime probe results
-- test results
-
-Rules:
-
-- Use file paths whenever relevant.
-- Add line ranges only when useful and likely to stay meaningful.
-- Prefer function/component names over fragile single-line references when the code is likely to move.
-- Include user-provided artifacts only as distilled excerpts.
-- Do not paste huge logs or screenshots into the report.
-- Avoid vague evidence like “looks wrong.”
-
-### Scope
-
-Scope is a permission boundary for the executor.
-
-Include both:
-
-- files/areas the executor may modify
-- behavioral/product/API constraints the executor must not violate
-
-Prefer exact files when known. Use areas when exact files are not yet known.
-
-### Commands
-
-Include only commands the next executor is likely to need.
-
-Each command must include:
-
-- purpose
-- exact command
-- expected result
-
-Never invent standard install, typecheck, test, lint, or build commands.
-Include a command only after discovering it in repo config, docs, CI, scripts, or reliable user-provided instructions.
-When no command is known, say `No repo verification command found during investigation.` instead of filling placeholder rows.
-
-Do not list every command attempted during investigation unless it provides useful context.
-
-### Done criteria
-
-Done criteria must be machine-checkable.
-
-Avoid vague items like:
-
-- “code is better”
-- “logic is cleaner”
-- “works correctly”
-
-Prefer observable checks:
-
-- command exits 0
-- test exists and passes
-- no debug probes remain
-- no files outside scope changed
-- public behavior/API shape unchanged
-
-### STOP conditions
-
-STOP conditions must prevent improvisation when the plan no longer matches reality.
-
-Include conditions such as:
-
-- current code does not match the report’s excerpts
-- verification fails repeatedly
-- fix requires touching out-of-scope files
-- confirmed root cause is false
-- public behavior/API change appears necessary but is out of scope
+- In `report` mode, use `references/debug-report-template.md` for final reports.
+- In `fix` mode, do not use the full report template unless the user asks for it.
+- Keep final output short and evidence-based. Avoid unresolved open-ended TODOs unless you are explicitly waiting for user-provided probe output.

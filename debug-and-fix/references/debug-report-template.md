@@ -1,160 +1,81 @@
-# Debug Report: <short bug title>
+# Frontend Debug Report: <short bug title>
 
-- **Status**: TODO | IN PROGRESS | DONE
+- **Status**: INVESTIGATING | DIAGNOSED | READY TO FIX | FIXED
+- **Mode**: REPORT | FIX
+- **Reproduction**: REPRODUCED | PARTIAL | NOT REPRODUCED
 - **Risk**: LOW | MED | HIGH
 - **Confidence**: LOW | MED | HIGH
-
-<!--
-Optional: Planned at.
-Add "- **Planned at**: commit `<short SHA>`, <YYYY-MM-DD>" only when git metadata is available.
-Skip it entirely when git metadata is unavailable.
--->
 
 ## Summary
 
 - **Symptom**:
 - **Trigger**:
-- **Root cause**:
+- **Current best explanation**:
 - **Impact**:
-
-## Reproduction
-
-- **Status**: REPRODUCED | PARTIAL | NOT REPRODUCED
-- **Command / path**:
-- **Input / state**:
-- **Expected**:
-- **Actual**:
 
 ## Evidence
 
-Concrete facts that support the diagnosis.
+Include concrete facts only. Prefer file/symbol references over broad summaries.
 
-Use file paths whenever relevant. Add line ranges only when useful/stable. Include user-provided artifacts only as distilled excerpts.
+- **User-provided evidence**:
+- **Code evidence**:
+- **Runtime/test evidence**:
 
-- `<file/path>` — <relevant observation>
-- User-provided error: `<smallest relevant error excerpt>`
-- Runtime/test evidence: `<smallest relevant result>`
+## Working Hypotheses
+
+Include this section only while the root cause is not fully confirmed.
+
+| ID | Hypothesis | Why plausible | File refs | Confirm/rule out |
+| -- | ---------- | ------------- | --------- | ---------------- |
+| H1 |  |  |  |  |
+| H2 |  |  |  |  |
 
 ## Diagnosis
 
-- **Confirmed hypothesis**:
-- **Why this is the root cause**:
-  - ...
+Include this section once the root cause is confirmed.
 
-<!--
-Optional: Ruled out.
-Add "- **Ruled out**:" only when it prevents future backtracking or explains why an obvious alternative is not the cause.
-Omit it otherwise.
--->
+- **Confirmed cause**:
+- **Why this is the root cause, not only a symptom**:
+- **Rejected alternatives**:
 
-## Current state
+## Recommended Fix
 
-Self-contained context the executor needs. Do not write “as discussed”.
-
-Include:
-
-- relevant files and their roles
-- short code excerpts with `file:line` markers when useful
-- repo conventions or existing patterns to follow
-- relevant docs/design/API constraints, quoted or linked by path
-- any important context from user-provided logs, screenshots, or repro notes
-
-Example:
-
-- `src/orders/api.ts` — order creation endpoint; request input is validated here.
-- `src/orders/api.test.ts` — existing API test pattern to follow.
-- Existing validation pattern: `src/users/api.ts` normalizes request input before schema validation.
-
-## Commands you will need
-
-Exact commands from this repo. Do not guess. Include only commands the executor is likely to need.
-
-| Purpose | Command | Expected on success |
-| ------- | ------- | ------------------- |
-
-<!-- Add one row per exact command discovered during investigation. Do not include install/typecheck/test/lint rows unless those commands were verified in this repo. If no verification command exists, write: No repo verification command found during investigation. -->
-
-<!--
-Optional: Suggested executor toolkit.
-Add this section only when relevant skills/tools plausibly exist in the executor's environment. Skip otherwise.
--->
-
-## Scope
-
-**In scope** (the only files/areas you should modify):
-
-- `<file-or-area>`
-- `<behavior allowed to change>`
-
-**Out of scope** (do NOT touch, even though they look related):
-
-- `<file-or-area>` — <reason>
-- `<behavior/API/product constraint>` — <reason>
-
-## Recommended fix
-
+- **Scope**:
 - **Approach**:
-- **Why this approach**:
-- **Alternatives considered**:
-  - `<alternative>` — <why rejected>
+- **Files to touch**:
+- **Tests/checks**:
 
-- **Implementation plan**:
-  1. ...
-  2. ...
-  3. ...
+## Debug Probes
 
-## Steps
+Include only if probes were added or proposed.
 
-### Step 1: <imperative title>
+- **Probe status**: NOT ADDED | ACTIVE TEMPORARY | REMOVED
+- **Probe points and purpose**:
+- **User run/paste contract**:
+- **Observed sanitized values**:
 
-What to do precisely. Reference exact files/symbols. Include target code shape when load-bearing.
+## Commands
 
-**Verify**: `<command>` → <expected output>
+List only commands discovered in this repo. Do not guess.
 
-### Step 2: <imperative title>
+| Purpose | Command | Result or expected result |
+| ------- | ------- | ------------------------- |
 
-What to do precisely.
+## Done Criteria
 
-**Verify**: `<command>` → <expected output>
+- [ ] The issue no longer reproduces using the stated UI path or command.
+- [ ] The confirmed root cause is addressed directly.
+- [ ] Relevant regression coverage is added or updated when the repo has a clear test pattern.
+- [ ] Relevant verification command passes.
+- [ ] No `[DBG frontend ...]` probes or temporary debug logs remain.
+- [ ] No files outside the stated scope changed.
 
-<!--
-Each step should be small enough to verify independently.
-Order steps so the codebase is not left broken between steps when possible.
--->
+## Stop Conditions
 
-<!--
-Optional: Debug probes used.
-Add this section when probes/logs materially confirmed or rejected a hypothesis. Skip otherwise.
-Include exact probe code only when the next executor must recreate the probe.
-Observed values means sanitized summaries only; never secret values.
-Do not paste large logs.
--->
+Stop and report back if:
 
-## Done criteria
-
-Machine-checkable. ALL must hold:
-
-- [ ] Bug no longer reproduces using `<command or UI path>`.
-- [ ] Root cause is addressed directly, not worked around elsewhere.
-- [ ] Regression test added or updated for `<case>`, if the repo has a clear test pattern.
-- [ ] Relevant verification command passes: `<command>`.
-- [ ] No `[DBG ...]` probes or temporary debug logs remain in the code.
-- [ ] No files outside the in-scope list are modified.
-- [ ] Scope constraints are respected.
-- [ ] Existing public behavior/API shape remains unchanged, if applicable.
-
-## STOP conditions
-
-Stop and report back. Do not improvise if:
-
-- The code at the locations in "Current state" does not match the excerpts.
-- A step's verification fails twice after a reasonable fix attempt.
-- The fix appears to require touching an out-of-scope file.
-- The confirmed root cause no longer matches the live code.
-- You discover a key assumption from the diagnosis is false.
-- The fix appears to require a public behavior/API change that is out of scope.
-
-<!--
-Optional: Maintenance notes.
-Add this section only when useful for future changes, reviewer concerns, fragile areas, or deferred follow-up.
--->
+- The live code no longer matches the cited files/symbols.
+- A check fails twice after a reasonable fix attempt.
+- The fix requires touching files outside the stated scope.
+- A confirmed hypothesis is disproved by new evidence.
+- The fix would require a product/API behavior change that was not requested.
