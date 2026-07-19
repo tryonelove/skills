@@ -1,0 +1,4 @@
+interface:
+  display_name: "Explain Diff"
+  short_description: "Turn a code diff into an interactive lesson"
+  default_prompt: "Use $explain-diff to teach me this change from background through an interactive quiz."
